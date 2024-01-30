@@ -8,7 +8,7 @@ Für TailwindCSS anhand der Basisdirektiven dynamisch eine output.css generieren
 
 Den Entwicklungsserver starten:
 
-`npm run dev -- --open``
+`npm run dev -- --open`
 
 
 Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).

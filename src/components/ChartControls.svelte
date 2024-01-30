@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { selectedYears, includeInflation, selectedInvestmentType } from "../stores/store";
+    import { selectedYears, includeInflation, selectedInvestmentType } from "../stores/stores";
     import { investmentOptions } from "../data/investmentOptions";
 </script>
 

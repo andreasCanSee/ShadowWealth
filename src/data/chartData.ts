@@ -1,5 +1,5 @@
 import { derived } from "svelte/store";
-import { selectedYears, currentSavings, includeInflation, selectedInvestmentType } from "../stores/store";
+import { selectedYears, currentSavings, includeInflation, selectedInvestmentType } from "../stores/stores";
 import { investmentProperties } from "./investmentOptions";
 
 export type ChartData = {
