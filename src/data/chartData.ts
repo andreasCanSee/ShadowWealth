@@ -18,7 +18,6 @@ export const chartData = derived([selectedYears, currentSavings, includeInflatio
         return { labels, minData: Array($selectedYears).fill($currentSavings) };
     }
 
-    
     const minData = calculateData($selectedYears, $currentSavings, selectedOption.interestRate.min, $includeInflation);
     
     let maxData;

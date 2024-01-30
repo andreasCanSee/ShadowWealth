@@ -6,6 +6,8 @@
 
 <div class="min-h-screen bg-yellow-100">
     <Header />
-    <BarChart />
-    <ChartControls />
+    <div style="width: 80vw; margin: auto;"> <!-- Wrapper mit gleichen Stilen wie BarChart -->
+        <BarChart />
+        <ChartControls />
+    </div>
 </div>
