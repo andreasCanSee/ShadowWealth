@@ -3,12 +3,13 @@
     import { priorityProperties } from "../data/priorityOptions";
     import { expenses } from "../stores/stores";
     import type { Expense } from "$lib/types";
-    import { totalExpenses } from "../stores/stores";
 
     let name = '';
     let cost: number;
     let selectedFrequencyMultiplier = frequencyProperties[0].multiplier;
     let selectedPriorityValue = priorityProperties[0].value;
+
+    $: totalExpenses = $expenses.reduce((sum, expense) => sum + expense.cost, 0);
 
     function addExpense() {
         const newExpense: Expense = {
@@ -77,5 +78,5 @@
 </div>
 
 <div>
-    Gesamtsumme der Ausgaben: {$totalExpenses}€
+    Gesamtsumme der Ausgaben: {totalExpenses}€
 </div>
