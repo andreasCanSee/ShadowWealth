@@ -8,8 +8,9 @@
 <div class="min-h-screen bg-yellow-100">
     <Header />
     <div style="width: 80vw; margin: auto;"> <!-- Wrapper mit gleichen Stilen wie BarChart -->
+        <ExpenseInput/>
         <BarChart />
         <ChartControls />
-        <ExpenseInput/>
+     
     </div>
 </div>

@@ -16,12 +16,11 @@
             id: Date.now().toString(), // Einfache Methode, um eine eindeutige ID zu generieren
             name,
             cost: cost,
-            frequency: selectedFrequencyMultiplier,
+            annualFrequency: selectedFrequencyMultiplier,
             prio: selectedPriorityValue,
         };
 
         expenses.update(currentExpenses => [...currentExpenses, newExpense]);
-        console.log($expenses)
 
         // Eingabefelder zurücksetzen
         name = '';
@@ -73,7 +72,7 @@
 
 <div>
     {#each $expenses as expense (expense.id)}
-        <p>{expense.name} - {expense.cost}€ - {expense.frequency}</p>
+        <p>{expense.name} - {expense.cost}€ - {expense.annualFrequency}</p>
     {/each}
 </div>
 
