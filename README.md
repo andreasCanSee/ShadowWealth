@@ -22,7 +22,7 @@ Um **ShadowWealth** lokal auszuführen, stelle zunächst sicher, dass `Node.js` 
 
 1. Klone das Repository:
     ```
-    git clone https://github.com/andreasCanSee/**ShadowWealth**.git
+    git clone https://github.com/andreasCanSee/ShadowWealth.git
     ```
 2. Installiere die Abhängigkeiten
     ``` 
