@@ -5,3 +5,8 @@ export type Expense = {
     annualFrequency: number; // Häufigkeit der Ausgabe (Einmalig, Wöchentlich, Monatlich, Jährlich)
     prio: number;
 }
+
+export type ExpenseData = {
+    cost: number;
+    annualFrequency: number;
+};

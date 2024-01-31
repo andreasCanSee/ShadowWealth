@@ -1,8 +1,10 @@
 <script lang="ts">
-    import Header from "../components/Header.svelte";
-    import BarChart from "../components/BarChart.svelte";
-    import ChartControls from "../components/ChartControls.svelte";
-    import ExpenseInput from "../components/ExpenseInput.svelte";
+    import Header from "../lib/Components/Header.svelte";
+    import ExpenseInput from "../lib/Components/ExpenseInput.svelte";
+    import BarChart from "../lib/Components/BarChart.svelte";
+    import ChartControls from "../lib/Components/ChartControls.svelte";
+    import ExpenseCard from "../lib/Components//ExpenseCard.svelte";
+    import { chartStore } from "../lib/Stores/stores";
 </script>
 
 <div class="min-h-screen bg-yellow-100">
@@ -11,6 +13,10 @@
         <ExpenseInput/>
         <BarChart />
         <ChartControls />
-     
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {#each $chartStore.expenses as expense (expense.id)}
+                <ExpenseCard {expense}/>
+            {/each}
+        </div>
     </div>
 </div>

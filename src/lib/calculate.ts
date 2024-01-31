@@ -1,51 +1,6 @@
-import { derived } from "svelte/store";
-import { selectedYears, expenses, includeInflation, selectedInvestmentType } from "../stores/stores";
-import { investmentProperties } from "./investmentOptions";
+import type { ExpenseData } from "./Models/types";
 
-export type ChartData = {
-    labels: string[];
-    minData: number[];
-    maxData?: number[]; //optional
-};
-
-type ExpenseData = {
-    cost: number;
-    annualFrequency: number;
-};
-
-export const chartData = derived([selectedYears, expenses, includeInflation, selectedInvestmentType], ([$selectedYears, $expenses, $includeInflation, $selectedInvestmentType]) => {
-    const labels = Array.from({ length: $selectedYears }, (_, i) => `${i + 1} Jahr${i > 0 ? 'e' : ''}`);
-    const expenseData: ExpenseData[] = $expenses.map(expense => ({ cost: expense.cost, annualFrequency: expense.annualFrequency }));
-
-    const selectedOption = investmentProperties.find(option => option.label === $selectedInvestmentType);
-
-    if (!selectedOption) {
-        console.error('Ausgewählte Anlageoption nicht gefunden:', $selectedInvestmentType);
-        // Default-Werte zurückgeben, wenn keine Option gefunden wird
-        return { labels, minData: Array($selectedYears).fill(0) };
-    }
-
-    const minData = calculateData($selectedYears, expenseData, selectedOption.interestRate.min, $includeInflation);
-    
-    let maxData;
-    // MaxData nur für volatile Anlageformen berechnen
-    if (selectedOption.volatility) {
-        maxData = calculateData($selectedYears, expenseData, selectedOption.interestRate.max, $includeInflation);
-    }
-
-    // Ergebnisobjekt, inklusive maxData, wenn vorhanden
-    const result: ChartData = { labels, minData };
-    if (maxData) {
-        result.maxData = maxData;
-    }
-    console.log(result)
-    
-    return result;
-});
-  
-export default chartData;
-
-function calculateData(years: number, expenses: ExpenseData[], annualRate: number, includeInflation: boolean): number[] {
+export function calculateData(years: number, expenses: ExpenseData[], annualRate: number, includeInflation: boolean): number[] {
     const inflationRate = 0.02; // Angenommene durchschnittliche Inflationsrate pro Jahr in Prozent
     let monthlyRate = annualRate / 12; // Monatlicher Zinssatz
 
@@ -89,6 +44,3 @@ function calculateData(years: number, expenses: ExpenseData[], annualRate: numbe
     }
     return annualValues;
 }
-
-
-

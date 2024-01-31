@@ -1,15 +1,13 @@
 <script lang="ts">
-    import { frequencyProperties } from "../data/frequencyOptions";
-    import { priorityProperties } from "../data/priorityOptions";
-    import { expenses } from "../stores/stores";
-    import type { Expense } from "$lib/types";
+    import { frequencyProperties } from "$lib/Models/frequencyOptions";
+    import { priorityProperties } from "$lib/Models/priorityOptions";
+    import type { Expense } from "$lib/Models/types";
+    import { addExpenseToChartStore } from "$lib/Stores/stores";
 
     let name = '';
     let cost: number;
     let selectedFrequencyMultiplier = frequencyProperties[0].multiplier;
     let selectedPriorityValue = priorityProperties[0].value;
-
-    $: totalExpenses = $expenses.reduce((sum, expense) => sum + expense.cost, 0);
 
     function addExpense() {
         const newExpense: Expense = {
@@ -20,7 +18,7 @@
             prio: selectedPriorityValue,
         };
 
-        expenses.update(currentExpenses => [...currentExpenses, newExpense]);
+        addExpenseToChartStore(newExpense);
 
         // Eingabefelder zurücksetzen
         name = '';
@@ -70,12 +68,3 @@
     </button>
 </div>
 
-<div>
-    {#each $expenses as expense (expense.id)}
-        <p>{expense.name} - {expense.cost}€ - {expense.annualFrequency}</p>
-    {/each}
-</div>
-
-<div>
-    Gesamtsumme der Ausgaben: {totalExpenses}€
-</div>

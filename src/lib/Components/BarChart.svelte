@@ -2,7 +2,7 @@
     import { onMount, onDestroy } from 'svelte';
     import Chart from 'chart.js/auto';
     import type { ChartConfiguration } from 'chart.js/auto';
-    import { chartData } from '../data/chartData';
+    import { chartData } from '$lib/Stores/stores';
 
     let chart: Chart;
 
