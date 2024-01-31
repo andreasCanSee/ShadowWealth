@@ -1,26 +1,13 @@
 <script lang="ts">
     import type { Expense } from "$lib/Models/types";
     import { priorityProperties } from "$lib/Models/priorityOptions";
-    import { removeExpenseFromChartStore } from "$lib/Stores/stores";
+    import { removeExpenseFromChartStore, updateExpenseCost, toggleExpenseActiveStatus } from "$lib/Stores/stores";
+    import { getFrequencyLabel } from "$lib/Models/frequencyOptions";
+    import { getPriorityEmoji } from "$lib/Models/priorityOptions";
 
     export let expense: Expense;
 
-    let sliderValue = expense.cost;
-
-    // Reaktive Aktualisierung des cost-Werts im Store, wenn der Slider bewegt wird
-    /*
-    $: if (sliderValue !== expense.cost) {
-        expenses.update(currentExpenses => {
-            return currentExpenses.map(e => e.id === expense.id ? {...e, cost: sliderValue} : e);
-        });
-    }
-    */
-
-    // Funktion, um das Emoji basierend auf der Priorität zu erhalten
-    function getPriorityEmoji(prio: number) {
-        const found = priorityProperties.find(p => p.value === prio);
-        return found ? found.label : '';
-    }
+    let sliderValue = expense.simulatedCost ?? expense.cost;
 
     // Funktion zur Berechnung der jährlichen Kosten
     function calculateAnnualCost(cost: number, frequency: number) {
@@ -30,12 +17,22 @@
     }
 </script>
 
-<div class="bg-purple-800 text-white mt-4 shadow-md rounded p-4 flex flex-col justify-between mb-4">
+<div class:bg-purple-800={expense.isActive} class:bg-gray-600={!expense.isActive} class=" text-white shadow-md rounded p-4 flex flex-col justify-between mb-1">
     <div class="flex justify-between">
         <div class="flex-grow">
-            <h3 class="text-lg font-bold">{expense.name} {getPriorityEmoji(expense.prio)} <span class="text-sm font-normal">({expense.annualFrequency > 1 ? `${expense.annualFrequency}x jährlich` : 'Einmalig'})</span></h3>
-            <p>kostet dich <strong>{calculateAnnualCost(expense.cost, expense.annualFrequency)}€</strong> im Jahr 💸 </p>
+            <h3 class="text-lg font-bold">{expense.name} {getPriorityEmoji(expense.prio)} <span class="text-sm font-normal">({expense.annualFrequency > 1 ? `${expense.annualFrequency}x jährlich` : getFrequencyLabel(expense.annualFrequency)})</span></h3>
+            <p>kostet dich <strong>{calculateAnnualCost(expense.cost, expense.annualFrequency)}€</strong> {expense.annualFrequency > 0 ? 'im Jahr' : ''} 💸 </p>
         </div>
+        <button 
+            class="bg-yellow-100 hover:bg-yellow-300 text-black font-bold px-4 mr-2 rounded"
+            on:click={() => toggleExpenseActiveStatus(expense.id)}
+            >
+            {#if expense.isActive}
+                -
+            {:else}
+                +
+            {/if}
+        </button>
         <button 
             class="bg-red-500 hover:bg-red-700 text-white font-bold px-4 rounded"
             on:click={() => removeExpenseFromChartStore(expense.id)}
@@ -45,8 +42,16 @@
     </div>
     <hr class="my-2"/>
     <div class="flex items-center">
-        <p class="mr-2">Neuer Preis: {sliderValue}€</p>
+        <p class="mr-2">{sliderValue < expense.cost ? 'Neuer Preis: ' : 'Preis: '}{sliderValue}€</p>
         <input type="range" min="0" max={expense.cost} bind:value={sliderValue} class="slider mr-2">
-        <p class="mr-4">Ersparnis: {expense.cost - sliderValue}€ </p>
+        <p class="mr-4">Ersparnis: {expense.cost - sliderValue}€ <span class="text-sm">({getFrequencyLabel(expense.annualFrequency)})</span></p>
+        
     </div>
+    
+    <button 
+            class="bg-green-300 hover:bg-green-500 text-black mt-4 py-1 px-4 rounded"
+            on:click={() => updateExpenseCost(expense.id, expense.cost - sliderValue)}
+            >
+            Neues Ersparnis anlegen
+    </button>
 </div>

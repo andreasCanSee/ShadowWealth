@@ -8,7 +8,7 @@ export const chartStore = writable({
     selectedYears: 5,
     includeInflation: false,
     selectedInvestmentType: investmentOptions[0],
-    expenses: [] as Expense[]
+    expenses: [] as Expense[],
 });
 
 type ChartData = {
@@ -19,7 +19,11 @@ type ChartData = {
 
 export const chartData = derived(chartStore, ($chartStore) => {
     const labels = Array.from({ length: $chartStore.selectedYears }, (_, i) => `${i + 1} Jahr${i > 0 ? 'e' : ''}`);
-    const expenseData: ExpenseData[] = $chartStore.expenses.map(expense => ({ cost: expense.cost, annualFrequency: expense.annualFrequency }));
+    // Verwende simulatedCost, wenn vorhanden, sonst cost
+    const expenseData: ExpenseData[] = $chartStore.expenses.filter(expense => expense.isActive).map(expense => ({
+        cost: expense.simulatedCost ?? expense.cost,
+        annualFrequency: expense.annualFrequency
+    }));
 
     const selectedOption = investmentProperties.find(option => option.label === $chartStore.selectedInvestmentType);
 
@@ -42,7 +46,6 @@ export const chartData = derived(chartStore, ($chartStore) => {
     if (maxData) {
         result.maxData = maxData;
     }
-    console.log(result)
     
     return result;
 })
@@ -68,4 +71,45 @@ function removeExpenseFromChartStore(id: string) {
     });
 }
 
-export { addExpenseToChartStore, removeExpenseFromChartStore };
+function updateExpenseCost(id: string, newCost: number) {
+    chartStore.update($chartStore => {
+        const updatedExpenses = $chartStore.expenses.map(expense => {
+            // Wenn die ID übereinstimmt, aktualisiere die Kosten und optional die Häufigkeit
+            if (expense.id === id) {
+                if (newCost === 0) {
+                    const { simulatedCost, ...rest } = expense;
+                    return rest;
+                } else {
+                    return {
+                        ...expense,
+                        simulatedCost: newCost
+                    };
+                }
+            }
+            // Gib das Expense unverändert zurück, wenn die ID nicht übereinstimmt
+            return expense;
+        });
+
+        // Aktualisierten Zustand mit den neuen Ausgaben zurückgeben
+        return {
+            ...$chartStore,
+            expenses: updatedExpenses
+        };
+    });
+}
+
+function toggleExpenseActiveStatus(id: string) {
+    chartStore.update($chartStore => {
+        const updatedExpenses = $chartStore.expenses.map(expense => {
+            if (expense.id === id) {
+                return { ...expense, isActive: !expense.isActive };
+            }
+            return expense;
+        });
+
+        return { ...$chartStore, expenses: updatedExpenses };
+    });
+}
+
+
+export { addExpenseToChartStore, removeExpenseFromChartStore, updateExpenseCost, toggleExpenseActiveStatus };

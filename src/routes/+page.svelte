@@ -14,7 +14,7 @@
         <BarChart />
         <ChartControls />
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {#each $chartStore.expenses as expense (expense.id)}
+            {#each $chartStore.expenses.slice().sort((a, b) => a.prio - b.prio) as expense (expense.id)}
                 <ExpenseCard {expense}/>
             {/each}
         </div>

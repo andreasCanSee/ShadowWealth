@@ -16,6 +16,7 @@
             cost: cost,
             annualFrequency: selectedFrequencyMultiplier,
             prio: selectedPriorityValue,
+            isActive: true
         };
 
         addExpenseToChartStore(newExpense);
@@ -63,7 +64,11 @@
             </div>
     </div>
 
-    <button class="w-full p-2 bg-green-300 text-white rounded-md hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" on:click={addExpense}>
+    <button 
+    class="w-full p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 {name.trim().length === 0 || !Number.isFinite(cost) || cost <= 0 ? 'bg-gray-600 text-white cursor-not-allowed' : 'bg-green-300 text-black hover:bg-green-500'}" 
+        on:click={addExpense}
+        disabled={name.trim().length === 0 || !Number.isFinite(cost) || cost <= 0}
+    >
         +
     </button>
 </div>

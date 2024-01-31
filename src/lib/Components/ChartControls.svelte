@@ -3,7 +3,7 @@
     import { investmentOptions } from "$lib/Models/investmentOptions";
 </script>
 
-<div class="flex space-x-4 justify-between bg-green-300 p-4 rounded-lg border border-black"> <!-- Flex-Container mit Hintergrund, Padding, Abrundung und Border -->
+<div class="flex space-x-4 justify-between bg-green-300 p-4 rounded-lg border border-black mt-4 mb-8"> <!-- Flex-Container mit Hintergrund, Padding, Abrundung und Border -->
     <div class="flex flex-col items-start space-y-1"> <!-- Gruppierung für den Zeitraum-Slider -->
         <label for="years-slider" class="whitespace-nowrap font-bold">Zeitraum:</label> <!-- Fettgedruckte Schrift für das Label -->
         <input id="years-slider" type="range" min="1" max="10" class="slider w-full" bind:value={$chartStore.selectedYears}> <!-- Volle Breite für den Slider -->
