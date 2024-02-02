@@ -2,7 +2,7 @@
     import { frequencyProperties } from "$lib/Models/frequencyOptions";
     import { priorityProperties } from "$lib/Models/priorityOptions";
     import type { Expense } from "$lib/Models/types";
-    import { addExpenseToChartStore } from "$lib/Stores/stores";
+    import { addExpenseToSimulation } from "$lib/Stores/stores";
 
     let name = '';
     let cost: number;
@@ -19,7 +19,7 @@
             isActive: true
         };
 
-        addExpenseToChartStore(newExpense);
+        addExpenseToSimulation(newExpense);
 
         // Eingabefelder zurücksetzen
         name = '';
@@ -29,7 +29,7 @@
     }
 </script>
 
-<div class="space-y-4 mt-4 bg-white p-4 rounded-lg shadow border border-black">
+<div class="space-y-4 mt-4 mb-8 bg-white p-4 rounded-lg shadow border border-black">
     <div class="flex items-center space-x-2">
         <span>📝</span>
         <input type="text" placeholder="Artikel/Service" bind:value={name}

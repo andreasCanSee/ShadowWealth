@@ -1,7 +1,6 @@
 <script lang="ts">
     import type { Expense } from "$lib/Models/types";
-    import { priorityProperties } from "$lib/Models/priorityOptions";
-    import { removeExpenseFromChartStore, updateExpenseCost, toggleExpenseActiveStatus } from "$lib/Stores/stores";
+    import { removeExpenseFromSimulation, updateExpenseInSimulation, toggleExpenseActiveStatusInSimulation } from "$lib/Stores/stores";
     import { getFrequencyLabel } from "$lib/Models/frequencyOptions";
     import { getPriorityEmoji } from "$lib/Models/priorityOptions";
 
@@ -25,7 +24,7 @@
         </div>
         <button 
             class="bg-yellow-100 hover:bg-yellow-300 text-black font-bold px-4 mr-2 rounded"
-            on:click={() => toggleExpenseActiveStatus(expense.id)}
+            on:click={() => toggleExpenseActiveStatusInSimulation(expense.id)}
             >
             {#if expense.isActive}
                 -
@@ -35,7 +34,7 @@
         </button>
         <button 
             class="bg-red-500 hover:bg-red-700 text-white font-bold px-4 rounded"
-            on:click={() => removeExpenseFromChartStore(expense.id)}
+            on:click={() => removeExpenseFromSimulation(expense.id)}
             >
             X
         </button>
@@ -50,7 +49,7 @@
     
     <button 
             class="bg-green-300 hover:bg-green-500 text-black mt-4 py-1 px-4 rounded"
-            on:click={() => updateExpenseCost(expense.id, expense.cost - sliderValue)}
+            on:click={() => updateExpenseInSimulation(expense.id, expense.cost - sliderValue)}
             >
             Neues Ersparnis anlegen
     </button>

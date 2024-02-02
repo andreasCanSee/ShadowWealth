@@ -1,81 +1,86 @@
 import { writable, derived } from "svelte/store";
 import { investmentOptions, investmentProperties } from "../Models/investmentOptions";
-import type { Expense, ExpenseData } from "$lib/Models/types";
+import type { DataSet, Expense, ExpenseData, SimulationStore, SimulationChartData } from "$lib/Models/types";
 import { calculateData } from "$lib/calculate";
 
 // Definition eines einzigen Store-Objekts, das alle relevanten Daten enthält
-export const chartStore = writable({
+export const simulationStore = writable<SimulationStore>({
     selectedYears: 5,
-    includeInflation: false,
-    selectedInvestmentType: investmentOptions[0],
-    expenses: [] as Expense[],
+    simulations: [
+        {
+            investmentType: investmentOptions[0],
+            includeInflation: false,
+            expenses: []
+        }
+    ],
+    currentSimulationIndex: 0
 });
 
-type ChartData = {
-    labels: string[];
-    minData: number[];
-    maxData?: number[]; //optional
-};
+export const chartData = derived(simulationStore, ($simulationStore): SimulationChartData => {
+    const labels = Array.from({ length: $simulationStore.selectedYears }, (_, i) => `${i + 1} Jahr${i > 0 ? 'e' : ''}`);
+    const dataSets: DataSet[] = $simulationStore.simulations.map((simulation) => {
+        
+        // Verwende simulatedCost, wenn vorhanden, sonst cost
+        const expenseData: ExpenseData[] = simulation.expenses.filter(expense => expense.isActive).map(expense => ({
+            cost: expense.simulatedCost ?? expense.cost,
+            annualFrequency: expense.annualFrequency
+        }));
 
-export const chartData = derived(chartStore, ($chartStore) => {
-    const labels = Array.from({ length: $chartStore.selectedYears }, (_, i) => `${i + 1} Jahr${i > 0 ? 'e' : ''}`);
-    // Verwende simulatedCost, wenn vorhanden, sonst cost
-    const expenseData: ExpenseData[] = $chartStore.expenses.filter(expense => expense.isActive).map(expense => ({
-        cost: expense.simulatedCost ?? expense.cost,
-        annualFrequency: expense.annualFrequency
-    }));
+        const selectedInvestmentOption = investmentProperties.find(option => option.label === simulation.investmentType);
 
-    const selectedOption = investmentProperties.find(option => option.label === $chartStore.selectedInvestmentType);
+        if (!selectedInvestmentOption) {
+            console.error('Ausgewählte Anlageoption nicht gefunden:', simulation.investmentType);
+            // Default-Werte zurückgeben, wenn keine Option gefunden wird
+            return { minData: Array($simulationStore.selectedYears).fill(0) };
+        }
 
-    if (!selectedOption) {
-        console.error('Ausgewählte Anlageoption nicht gefunden:', $chartStore.selectedInvestmentType);
-        // Default-Werte zurückgeben, wenn keine Option gefunden wird
-        return { labels, minData: Array($chartStore.selectedYears).fill(0) };
-    }
+        const minData = calculateData($simulationStore.selectedYears, expenseData, selectedInvestmentOption.interestRate.min, simulation.includeInflation);
+        
+        let dataSet: DataSet = { minData };
 
-    const minData = calculateData($chartStore.selectedYears, expenseData, selectedOption.interestRate.min, $chartStore.includeInflation);
-    
-    let maxData;
-    // MaxData nur für volatile Anlageformen berechnen
-    if (selectedOption.volatility) {
-        maxData = calculateData($chartStore.selectedYears, expenseData, selectedOption.interestRate.max, $chartStore.includeInflation);
-    }
+        // MaxData nur für volatile Anlageformen berechnen
+        if (selectedInvestmentOption.volatility) {
+            const maxData = calculateData($simulationStore.selectedYears, expenseData, selectedInvestmentOption.interestRate.max, simulation.includeInflation);
+            dataSet = { ...dataSet, maxData }
+        }
 
-    // Ergebnisobjekt, inklusive maxData, wenn vorhanden
-    const result: ChartData = { labels, minData };
-    if (maxData) {
-        result.maxData = maxData;
-    }
-    
-    return result;
+        return dataSet;
+
+    });
+    return { labels, dataSets }
 })
 
-function addExpenseToChartStore(newExpense: Expense) {
-    chartStore.update($chartStore => {
+function addExpenseToSimulation(newExpense: Expense) {
+    simulationStore.update($simulationStore => {
+        const updatedSimulations = [...$simulationStore.simulations];
+        updatedSimulations[$simulationStore.currentSimulationIndex].expenses.push(newExpense);
+
         return {
-            ...$chartStore,
-            expenses: [...$chartStore.expenses, newExpense]
+            ...$simulationStore,
+            simulations: updatedSimulations
         };
     });
 }
 
 // Funktion zum Entfernen einer Ausgabe aus dem Store
-function removeExpenseFromChartStore(id: string) {
-    chartStore.update($chartStore => {
+function removeExpenseFromSimulation(expenseId: string) {
+    simulationStore.update($simulationStore => {
+        const updatedSimulations = [...$simulationStore.simulations];
         // Verwenden Sie die Array filter-Methode, um die Ausgabe mit der angegebenen ID zu entfernen
-        const updatedExpenses = $chartStore.expenses.filter(expense => expense.id !== id);
+        updatedSimulations[$simulationStore.currentSimulationIndex].expenses = updatedSimulations[$simulationStore.currentSimulationIndex].expenses.filter(expense => expense.id !== expenseId);
         return {
-            ...$chartStore,
-            expenses: updatedExpenses
+            ...$simulationStore,
+            simulations: updatedSimulations
         };
     });
 }
 
-function updateExpenseCost(id: string, newCost: number) {
-    chartStore.update($chartStore => {
-        const updatedExpenses = $chartStore.expenses.map(expense => {
+function updateExpenseInSimulation(expenseId: string, newCost: number) {
+    simulationStore.update($simulationStore => {
+        const updatedSimulations = [...$simulationStore.simulations];
+        updatedSimulations[$simulationStore.currentSimulationIndex].expenses = updatedSimulations[$simulationStore.currentSimulationIndex].expenses.map(expense => {
             // Wenn die ID übereinstimmt, aktualisiere die Kosten und optional die Häufigkeit
-            if (expense.id === id) {
+            if (expense.id === expenseId) {
                 if (newCost === 0) {
                     const { simulatedCost, ...rest } = expense;
                     return rest;
@@ -92,24 +97,50 @@ function updateExpenseCost(id: string, newCost: number) {
 
         // Aktualisierten Zustand mit den neuen Ausgaben zurückgeben
         return {
-            ...$chartStore,
-            expenses: updatedExpenses
+            ...$simulationStore,
+            simulations: updatedSimulations
         };
     });
 }
 
-function toggleExpenseActiveStatus(id: string) {
-    chartStore.update($chartStore => {
-        const updatedExpenses = $chartStore.expenses.map(expense => {
-            if (expense.id === id) {
+function toggleExpenseActiveStatusInSimulation(expenseId: string) {
+    simulationStore.update($simulationStore => {
+        const updatedSimulations = [...$simulationStore.simulations];
+        updatedSimulations[$simulationStore.currentSimulationIndex].expenses = updatedSimulations[$simulationStore.currentSimulationIndex].expenses.map(expense => {
+            if (expense.id === expenseId) {
                 return { ...expense, isActive: !expense.isActive };
             }
             return expense;
         });
 
-        return { ...$chartStore, expenses: updatedExpenses };
+        return { ...$simulationStore, simulations: updatedSimulations };
     });
 }
 
+export { addExpenseToSimulation, removeExpenseFromSimulation, updateExpenseInSimulation, toggleExpenseActiveStatusInSimulation };
 
-export { addExpenseToChartStore, removeExpenseFromChartStore, updateExpenseCost, toggleExpenseActiveStatus };
+export function duplicateAndManageSimulations() {
+    simulationStore.update($simulationStore => {
+        // Kopiere die aktuelle Simulation
+        const newSimulation = { ...$simulationStore.simulations[$simulationStore.currentSimulationIndex] };
+        // Erstelle eine tiefe Kopie der Ausgaben, um Referenzen zu trennen
+        newSimulation.expenses = newSimulation.expenses.map(expense => ({ ...expense }));
+
+        // Füge die neue Simulation hinzu
+        const updatedSimulations = [...$simulationStore.simulations, newSimulation];
+
+        // Stelle sicher, dass nicht mehr als zwei Simulationen vorhanden sind
+        while (updatedSimulations.length > 2) {
+            updatedSimulations.shift(); // Entferne die älteste Simulation
+        }
+
+        // Aktualisiere den Index, um auf die neue Simulation zu zeigen
+        const updatedIndex = updatedSimulations.length - 1;
+
+        return {
+            ...$simulationStore,
+            simulations: updatedSimulations,
+            currentSimulationIndex: updatedIndex
+        };
+    });
+}
