@@ -32,7 +32,7 @@
     function updateInvestmentType(event: Event) {
         const target = event.target as HTMLSelectElement;
         const newType = target.value;
-        
+
         simulationStore.update($store => {
             $store.simulations[$store.currentSimulationIndex].investmentType = newType;
             return $store;
@@ -44,7 +44,7 @@
     <div class="flex flex-col items-start space-y-1"> <!-- Gruppierung für den Zeitraum-Slider -->
         <label for="years-slider" class="whitespace-nowrap font-bold">Zeitraum:</label> <!-- Fettgedruckte Schrift für das Label -->
         <input id="years-slider" type="range" min="1" max="10" class="slider w-full" bind:value={$simulationStore.selectedYears}> <!-- Volle Breite für den Slider -->
-        <span>{$simulationStore.selectedYears} Jahre</span>
+        <span>{$simulationStore.selectedYears} {$simulationStore.selectedYears > 1 ? 'Jahre' : 'Jahr'}</span>
     </div>
 
     <div class="flex flex-col items-start space-y-1">

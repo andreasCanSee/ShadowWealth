@@ -21,16 +21,19 @@
     <div style="width: 80vw; margin: auto;"> <!-- Wrapper mit gleichen Stilen wie BarChart -->
         <ExpenseInput/>
         <BarChart />
+        {#if currentSimulation.expenses.length > 0}
         <ChartControls />
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
             {#each currentSimulation.expenses.slice().sort((a, b) => a.prio - b.prio) as expense (expense.id)}
                 <ExpenseCard {expense}/>
             {/each}
         </div>
+        
         <div class="flex justify-center items-center">
             <button class="mt-4 bg-purple-800 hover:bg-purple-500 text-yellow-100 font-bold py-2 px-4 rounded" on:click="{duplicateAndManageSimulations}">
                 Simulation zum Vergleichen festhalten
             </button>
         </div>
+        {/if}
     </div>
 </div>

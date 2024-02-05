@@ -20,11 +20,13 @@ export const chartData = derived(simulationStore, ($simulationStore): Simulation
     const labels = Array.from({ length: $simulationStore.selectedYears }, (_, i) => `${i + 1} Jahr${i > 0 ? 'e' : ''}`);
     const dataSets: DataSet[] = $simulationStore.simulations.map((simulation) => {
         
-        // Verwende simulatedCost, wenn vorhanden, sonst cost
+        // Verwende adjustedCost, wenn vorhanden, sonst originalCost
         const expenseData: ExpenseData[] = simulation.expenses.filter(expense => expense.isActive).map(expense => ({
-            cost: expense.simulatedCost ?? expense.cost,
+            cost: expense.cost.adjustedCost ?? expense.cost.originalCost,
             annualFrequency: expense.annualFrequency
         }));
+
+        console.log(expenseData)
 
         const selectedInvestmentOption = investmentProperties.find(option => option.label === simulation.investmentType);
 
@@ -82,12 +84,19 @@ function updateExpenseInSimulation(expenseId: string, newCost: number) {
             // Wenn die ID übereinstimmt, aktualisiere die Kosten und optional die Häufigkeit
             if (expense.id === expenseId) {
                 if (newCost === 0) {
-                    const { simulatedCost, ...rest } = expense;
-                    return rest;
-                } else {
+                    const { adjustedCost, ...restCost } = expense.cost;
                     return {
                         ...expense,
-                        simulatedCost: newCost
+                        cost: restCost // Aktualisiere cost ohne adjustedCost
+                    };
+                } else {
+                    // Setze adjustedCost auf newCost, wenn newCost ungleich 0 ist
+                    return {
+                        ...expense,
+                        cost: {
+                            ...expense.cost,
+                            adjustedCost: newCost
+                        }
                     };
                 }
             }

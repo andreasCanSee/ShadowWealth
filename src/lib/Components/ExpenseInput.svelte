@@ -13,7 +13,7 @@
         const newExpense: Expense = {
             id: Date.now().toString(), // Einfache Methode, um eine eindeutige ID zu generieren
             name,
-            cost: cost,
+            cost: {originalCost: cost},
             annualFrequency: selectedFrequencyMultiplier,
             prio: selectedPriorityValue,
             isActive: true
