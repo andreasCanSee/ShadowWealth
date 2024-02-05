@@ -2,6 +2,7 @@ import { writable, derived } from "svelte/store";
 import { investmentOptions, investmentProperties } from "../Models/investmentOptions";
 import type { DataSet, Expense, ExpenseData, SimulationStore, SimulationChartData } from "$lib/Models/types";
 import { calculateData } from "$lib/calculate";
+import { initialExpenses } from "./initialExpenses";
 
 // Definition eines einzigen Store-Objekts, das alle relevanten Daten enthält
 export const simulationStore = writable<SimulationStore>({
@@ -10,7 +11,7 @@ export const simulationStore = writable<SimulationStore>({
         {
             investmentType: investmentOptions[0],
             includeInflation: false,
-            expenses: []
+            expenses: initialExpenses
         }
     ],
     currentSimulationIndex: 0
@@ -25,8 +26,6 @@ export const chartData = derived(simulationStore, ($simulationStore): Simulation
             cost: expense.cost.adjustedCost ?? expense.cost.originalCost,
             annualFrequency: expense.annualFrequency
         }));
-
-        console.log(expenseData)
 
         const selectedInvestmentOption = investmentProperties.find(option => option.label === simulation.investmentType);
 

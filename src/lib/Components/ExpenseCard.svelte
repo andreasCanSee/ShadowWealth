@@ -49,7 +49,7 @@
         
     </div>
     <hr class="my-2 border-t-2 border-dashed border-gray-400"/>
-    <p>Hier könntest du im Jahr <strong>{calculateAnnualCost(expense.cost.originalCost - sliderValue, expense.annualFrequency)}€</strong> sparen 💰</p>
+    <p>Hier könntest du {expense.annualFrequency > 0 ? 'im Jahr' : ''} <strong>{calculateAnnualCost(expense.cost.originalCost - sliderValue > 0 ? expense.cost.originalCost - sliderValue: expense.cost.originalCost, expense.annualFrequency)}€</strong> sparen 💰</p>
     <button 
             class="bg-green-300 hover:bg-green-500 text-black mt-4 py-1 px-4 rounded"
             on:click={() => updateExpenseInSimulation(expense.id, expense.cost.originalCost - sliderValue)}

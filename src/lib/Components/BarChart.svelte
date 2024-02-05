@@ -128,7 +128,10 @@
     // Diagramm bauen
     onMount(() => {
         const ctx = (document.getElementById('myChart') as HTMLCanvasElement)?.getContext('2d');
-        if(ctx) chart = new Chart(ctx, chartConfig);
+        if(ctx){
+            chart = new Chart(ctx, chartConfig);
+            updateChart();
+        } 
     })
 
     // Diagramm zerstören
